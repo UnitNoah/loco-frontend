@@ -9,9 +9,9 @@ const Header = () => {
                 <img src={logo} alt="Loco Logo" className="h-8 mr-[100px]" />
             </Link>
             <div className="flex gap-12">
-                <Link to="/" className="hover:text-blue-200">스팟</Link>
-                <Link to="/" className="hover:text-blue-200">즐겨찾기</Link>
-                <Link to="/" className="hover:text-blue-200">프로필</Link>
+                <Link to="/spot" className="hover:text-blue-200">스팟</Link>
+                <Link to="/favorites" className="hover:text-blue-200">즐겨찾기</Link>
+                <Link to="/profile" className="hover:text-blue-200">프로필</Link>
             </div>
         </div>
       <div className="flex gap-4">

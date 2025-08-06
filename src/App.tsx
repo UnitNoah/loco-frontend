@@ -1,7 +1,6 @@
 import './App.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/layout/Layout'
-import Home from './pages/Home'
 import Spot from './pages/Spot'
 import Favorites from './pages/Favorites'
 import Profile from './pages/Profile'
@@ -11,7 +10,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
+          <Route index element={<Spot />} />
           <Route path="spot" element={<Spot />} />
           <Route path="favorites" element={<Favorites />} />
           <Route path="profile" element={<Profile />} />

@@ -1,6 +1,10 @@
+import SpotLayout from "../components/layout/SpotLayout"
+
 const Spot = () => {
   return (
-    <div>SpotPage</div>
+    <div>
+      <SpotLayout />
+    </div>
   )
 }
 

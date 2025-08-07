@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Search from '../ui/Search'
+import SpotCard from '../SpotCard'
 
 const SpotLayout = () => {
   const [activeTab, setActiveTab] = useState('공개')
@@ -8,9 +9,13 @@ const SpotLayout = () => {
   // Sample card data - replace with your actual data
   const cards = Array.from({ length: 12 }, (_, index) => ({
     id: index + 1,
-    title: `스팟 ${index + 1}`,
-    location: `위치 ${index + 1}`,
-    image: `https://picsum.photos/300/200?random=${index + 1}`
+    title: `내가 좋아하는 서울 디저트 맛집 모음`,
+    hashtags: ['아이스크림', '서울', '디저트'],
+    image: `https://picsum.photos/400/300?random=${index + 1}`,
+    username: 'new_iceCream?',
+    memberCount: 50,
+    userAvatar: undefined,
+    isLiked: false
   }))
 
   const tabs = ['공개', '비공개']
@@ -61,23 +66,22 @@ const SpotLayout = () => {
         </div>
       </div>
 
-      {/* TODO: implement actual cards in a separate component */}
+      {/* Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {cards.map((card) => (
-          <div
+          <SpotCard
             key={card.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-          >
-            <img
-              src={card.image}
-              alt={card.title}
-              className="w-full h-48 object-cover p-3"
-            />
-            <div className="p-4">
-              <h3 className="font-semibold text-lg mb-2">{card.title}</h3>
-              <p className="text-gray-600 text-sm">{card.location}</p>
-            </div>
-          </div>
+            id={card.id}
+            title={card.title}
+            hashtags={card.hashtags}
+            image={card.image}
+            username={card.username}
+            memberCount={card.memberCount}
+            userAvatar={card.userAvatar}
+            isLiked={card.isLiked}
+            onCardClick={() => console.log(`Clicked on ${card.title}`)}
+            onLikeClick={() => console.log(`Liked ${card.title}`)}
+          />
         ))}
       </div>
     </div>

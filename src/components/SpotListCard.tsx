@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import heartIcon from '../assets/icons/heart.svg'
+import { useNavigate } from 'react-router-dom'
 
-interface SpotCardProps {
+interface SpotListCardProps {
   id: number
   title: string
   hashtags: string[]
@@ -14,7 +15,7 @@ interface SpotCardProps {
   onLikeClick?: () => void
 }
 
-const SpotCard: React.FC<SpotCardProps> = ({ 
+const SpotListCard: React.FC<SpotListCardProps> = ({ 
   id, 
   title, 
   hashtags,
@@ -27,6 +28,11 @@ const SpotCard: React.FC<SpotCardProps> = ({
   onLikeClick
 }) => {
   const [liked, setLiked] = useState(isLiked)
+  const navigate = useNavigate()
+
+  const handleCardClick = () => {
+    navigate(`/spot/${id}`)
+  }
 
   const handleLikeClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -82,7 +88,7 @@ const SpotCard: React.FC<SpotCardProps> = ({
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          <button className="flex-1 bg-[#0C8CE9] text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors  cursor-pointer">
+          <button onClick={handleCardClick} className="flex-1 bg-[#0C8CE9] text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors  cursor-pointer">
             들어가기
           </button>
           <button 
@@ -101,4 +107,4 @@ const SpotCard: React.FC<SpotCardProps> = ({
   )
 }
 
-export default SpotCard
+export default SpotListCard

@@ -1,7 +1,11 @@
 import { Link } from 'react-router-dom'
 import logo from '../../assets/images/logo.svg'
 
-const Header = () => {
+type HeaderProps = {
+  onLoginClick?: () => void
+}
+
+const Header = ({ onLoginClick }: HeaderProps) => {
   return (
     <div className="flex justify-between items-center p-4">
         <div className="flex items-center">
@@ -16,7 +20,7 @@ const Header = () => {
         </div>
       <div className="flex gap-4">
         <button className="bg-[#0C8CE9] text-white px-10 py-2 rounded-md hover:cursor-pointer">스팟 생성</button>
-        <button className="px-10 py-2 rounded-md outline outline-1 outline-gray-300 hover:cursor-pointer">로그인</button>
+        <button onClick={onLoginClick} className="px-10 py-2 rounded-md outline outline-1 outline-gray-300 hover:cursor-pointer">로그인</button>
       </div>
     </div>
   )

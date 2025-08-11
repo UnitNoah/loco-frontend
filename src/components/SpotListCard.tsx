@@ -5,12 +5,15 @@ import { useNavigate } from 'react-router-dom'
 interface SpotListCardProps {
   id: number
   title: string
+  desc: string
   hashtags: string[]
   image: string
   username: string
   memberCount: number
   userAvatar?: string
   isLiked?: boolean
+  numOfLikes: number
+  createdAt: Date
   onCardClick?: () => void
   onLikeClick?: () => void
 }
@@ -18,12 +21,15 @@ interface SpotListCardProps {
 const SpotListCard: React.FC<SpotListCardProps> = ({ 
   id, 
   title, 
+  desc,
   hashtags,
   image, 
   username,
   memberCount,
   userAvatar,
   isLiked = false,
+  numOfLikes,
+  createdAt,
   onCardClick,
   onLikeClick
 }) => {
@@ -55,21 +61,40 @@ const SpotListCard: React.FC<SpotListCardProps> = ({
       {/* Content Section */}
       <div className="p-4">
         {/* Hashtags */}
-        <div className="flex flex-wrap gap-2 mb-3">
-          {hashtags.map((tag, index) => (
-            <span
+          <div className="flex flex-wrap gap-2 mb-3">
+            {hashtags.map((tag, index) => (
+              <span
               key={index}
-              className="px-3 py-1 bg-[#D9D9D9] text-black text-xs rounded-full"
-            >
-              #{tag}
-            </span>
+                className="px-3 py-1 bg-[#D9D9D9] text-black text-xs rounded-full"
+              >
+                #{tag}
+              </span>
           ))}
         </div>
 
-        {/* Title */}
-        <h3 className="font-medium text-gray-900 mb-3 text-base leading-tight">
-          {title}
-        </h3>
+        {/* Status Tags and Title */}
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-medium text-gray-900 text-base leading-tight flex-1">
+            {title}
+          </h3>
+          <div className="flex gap-2">
+            {createdAt && (Date.now() - createdAt.getTime()) < 7 * 24 * 60 * 60 * 1000 && (
+              <span className="px-1 bg-[#0C8CE9] text-white text-xs rounded-sm font-medium">
+                new
+              </span>
+            )}
+            {numOfLikes > 50 && (
+              <span className="px-1 bg-[#FF4B4B] text-white text-xs rounded-sm font-medium">
+                hot
+              </span>
+            )}
+          </div>
+        </div>
+
+
+
+        {/* Description */}
+        <p className="text-xs text-gray-600 mb-3">{desc}</p>
 
         {/* User Info */}
         <div className="flex items-center mb-4">

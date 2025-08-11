@@ -52,11 +52,13 @@ const SpotListCard: React.FC<SpotListCardProps> = ({
       onClick={onCardClick}
     >
       {/* Main Image */}
-      <img
-        src={image}
-        alt={title}
-        className="w-full h-64 object-cover"
-      />
+      <div className="w-full h-90 p-4">
+        <img
+          src={image}
+          alt={title}
+          className="w-full h-full rounded-lg object-cover"
+        />
+      </div>
       
       {/* Content Section */}
       <div className="p-4">

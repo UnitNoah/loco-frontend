@@ -1,12 +1,25 @@
-import React from 'react'
+import React from "react"
 
 type LoginProps = {
   open: boolean
   onClose: () => void
 }
 
+// 지원하는 로그인 provider 타입 정의
+type Provider = "google" | "naver" | "kakao" | "facebook"
+
 const Login: React.FC<LoginProps> = ({ open, onClose }) => {
   if (!open) return null
+
+  // 로그인 시작 핸들러
+  const handleLogin = (provider: Provider) => {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
+    if (!apiBase) {
+      console.error("VITE_API_BASE_URL 환경변수가 설정되지 않았습니다.")
+      return
+    }
+    window.location.href = `${apiBase}/oauth2/authorization/${provider}`
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -34,15 +47,26 @@ const Login: React.FC<LoginProps> = ({ open, onClose }) => {
           </div>
 
           <div className="space-y-4">
-            <button className="w-full flex items-center gap-4 bg-[#F1D45A] text-black px-5 py-3 rounded-2xl shadow-md hover:shadow-lg transition">
+            <button
+              onClick={() => handleLogin("kakao")}
+              className="w-full flex items-center gap-4 bg-[#F1D45A] text-black px-5 py-3 rounded-2xl shadow-md hover:shadow-lg transition"
+            >
               <span className="inline-flex w-7 h-7 rounded-full bg-black/70 items-center justify-center text-white text-sm">k</span>
               <span className="flex-1 text-sm font-medium">카카오로 쉬운시작</span>
             </button>
-            <button className="w-full flex items-center gap-4 bg-[#3B5998] text-white px-5 py-3 rounded-2xl shadow-md hover:shadow-lg transition">
+
+            <button
+              onClick={() => handleLogin("facebook")}
+              className="w-full flex items-center gap-4 bg-[#3B5998] text-white px-5 py-3 rounded-2xl shadow-md hover:shadow-lg transition"
+            >
               <span className="inline-flex w-7 h-7 rounded-full bg-white/20 items-center justify-center text-white text-sm">f</span>
               <span className="flex-1 text-sm font-medium">페이스북으로 쉬운시작</span>
             </button>
-            <button className="w-full flex items-center gap-4 bg-[#2DB400] text-white px-5 py-3 rounded-2xl shadow-md hover:shadow-lg transition">
+
+            <button
+              onClick={() => handleLogin("naver")}
+              className="w-full flex items-center gap-4 bg-[#2DB400] text-white px-5 py-3 rounded-2xl shadow-md hover:shadow-lg transition"
+            >
               <span className="inline-flex w-7 h-7 rounded-full bg-white items-center justify-center text-[#2DB400] text-sm font-extrabold">N</span>
               <span className="flex-1 text-sm font-medium">네이버로 쉬운시작</span>
             </button>

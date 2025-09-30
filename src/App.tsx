@@ -12,21 +12,33 @@ function App() {
   const { login, logout } = useAuthStore()
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/profile`, {
-      credentials: 'include', // 쿠키 포함
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('Not logged in')
-        return res.json()
-      })
-      .then((data) => {
+    const loadProfile = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/profile`, {
+          credentials: "include", // 쿠키 포함
+        })
+
+        if (!res.ok) {
+          throw new Error("Not logged in")
+        }
+
+        const data = await res.json()
         const user = data.data
-        login({ email: user.email, nickname: user.nickname })
-      })
-      .catch(() => {
+
+        login({
+          email: user.email,
+          nickname: user.name,          
+          profileImage: user.profile_image,
+        })
+      } catch (err) {
         logout()
-      })
-  }, [login, logout])
+        console.log(err)
+      }
+    }
+
+  loadProfile()
+}, [login, logout])
+
 
   return (
     <BrowserRouter>

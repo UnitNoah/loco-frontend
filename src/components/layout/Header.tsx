@@ -8,7 +8,7 @@ type HeaderProps = {
 
 const Header = ({ onLoginClick }: HeaderProps) => {
   const { isLoggedIn, user, logout } = useAuthStore()
-  
+
   return (
     <div className="flex justify-between items-center p-4">
       {/* 로고 + 네비게이션 */}

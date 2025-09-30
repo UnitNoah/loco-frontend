@@ -4,17 +4,25 @@ import { jwtDecode } from "jwt-decode"
 type JwtPayload = {
   email?: string
   nickname?: string
+  profileImage?: string
   exp: number
   iat: number
   sub: string
 }
 
+// UserInfo는 프론트 전역 상태에서 쓰이는 유저 정보 타입
+type UserInfo = {
+  email?: string
+  nickname?: string
+  profileImage?: string
+}
+
 type AuthState = {
   isLoggedIn: boolean
-  user: { email?: string; nickname?: string } | null
-  login: (user: { email?: string; nickname?: string }) => void
+  user: UserInfo | null
+  login: (user: UserInfo) => void
   logout: () => void
-  initFromCookie: () => void   // ← 추가
+  initFromCookie: () => void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -28,10 +36,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   initFromCookie: () => {
     const token = getCookie("access_token")
     if (token) {
+      debugger;
       const payload = jwtDecode<JwtPayload>(token)
       set({
         isLoggedIn: true,
-        user: { email: payload.email, nickname: payload.nickname },
+        user: {
+          email: payload.email,
+          nickname: payload.nickname,
+          profileImage: payload.profileImage,
+        },
       })
     }
   },

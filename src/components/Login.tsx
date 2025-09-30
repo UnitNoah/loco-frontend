@@ -56,12 +56,15 @@ const Login: React.FC<LoginProps> = ({ open, onClose }) => {
             </button>
 
             <button
-              onClick={() => handleLogin("facebook")}
-              className="w-full flex items-center gap-4 bg-[#3B5998] text-white px-5 py-3 rounded-2xl shadow-md hover:shadow-lg transition"
+              onClick={() => handleLogin("google")}
+              className="w-full flex items-center gap-4 bg-white text-[#4285F4] px-5 py-3 rounded-2xl shadow-md hover:shadow-lg transition"
             >
-              <span className="inline-flex w-7 h-7 rounded-full bg-white/20 items-center justify-center text-white text-sm">f</span>
-              <span className="flex-1 text-sm font-medium">페이스북으로 쉬운시작</span>
+              <span className="inline-flex w-7 h-7 rounded-full bg-[#4285F4] items-center justify-center text-white text-sm">
+                G
+              </span>
+              <span className="flex-1 text-sm font-medium text-black">구글로 쉬운시작</span>
             </button>
+
 
             <button
               onClick={() => handleLogin("naver")}

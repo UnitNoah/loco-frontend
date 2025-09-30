@@ -30,8 +30,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   login: (user) => set({ isLoggedIn: true, user }),
   logout: () => {
-    // 로그아웃시 쿠키도 삭제하도록 API 호출 필요할 수 있음
-    set({ isLoggedIn: false, user: null })
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    }).finally(() => {
+      set({ isLoggedIn: false, user: null })
+    })
   },
   initFromCookie: () => {
     const token = getCookie("access_token")

@@ -31,7 +31,7 @@ const SpotListLayout = () => {
         </div>
 
         {/* Search and Filter on the right */}
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center mt-5">
           <Search
             value={searchQuery}
             onChange={setSearchQuery}

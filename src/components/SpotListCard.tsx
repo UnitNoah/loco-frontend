@@ -15,6 +15,16 @@ interface SpotListCardProps {
   numOfLikes: number
   createdAt: Date
   onCardClick?: () => void
+
+  mode?: "default" | "owner" | "member"
+  // owner mode 전용
+  onEditClick?: () => void
+  onDeleteClick?: () => void
+
+  // member mode 전용
+  onLeaveClick?: () => void
+
+  // default mode 전용
   onLikeClick?: () => void
 }
 
@@ -31,7 +41,12 @@ const SpotListCard: React.FC<SpotListCardProps> = ({
   numOfLikes,
   createdAt,
   onCardClick,
-  onLikeClick
+  onLikeClick,
+  // 추가
+  mode = "default",
+  onEditClick,
+  onDeleteClick,
+  onLeaveClick
 }) => {
   const [liked, setLiked] = useState(isLiked)
   const navigate = useNavigate()
@@ -115,20 +130,67 @@ const SpotListCard: React.FC<SpotListCardProps> = ({
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          <button onClick={handleCardClick} className="flex-1 bg-[#0C8CE9] text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors  cursor-pointer">
-            들어가기
-          </button>
-          <button 
-            onClick={handleLikeClick}
-            className="w-10 h-10 bg-white border border-gray-300 rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors  cursor-pointer"
-          >
-            <img
-              src={heartIcon}
-              alt="heart"
-              className={`w-5 h-5 ${liked ? 'text-red-500 fill-current' : 'text-gray-400'}`}
-            />
-          </button>
+          {mode === "owner" ? (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEditClick?.()
+                }}
+                className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
+              >
+                수정하기
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDeleteClick?.()
+                }}
+                className="flex-1 bg-red-500 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-600 transition-colors"
+              >
+                삭제하기
+              </button>
+            </>
+          ) : mode === "member" ? (
+            <>
+              <button
+                onClick={handleCardClick}
+                className="flex-1 bg-[#0C8CE9] text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
+                들어가기
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onLeaveClick?.()
+                }}
+                className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-600 transition-colors"
+              >
+                나가기
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleCardClick}
+                className="flex-1 bg-[#0C8CE9] text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
+                들어가기
+              </button>
+              <button
+                onClick={handleLikeClick}
+                className="w-10 h-10 bg-white border border-gray-300 rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+              >
+                <img
+                  src={heartIcon}
+                  alt="heart"
+                  className={`w-5 h-5 ${liked ? "text-red-500 fill-current" : "text-gray-400"}`}
+                />
+              </button>
+            </>
+          )}
         </div>
+
       </div>
     </div>
   )

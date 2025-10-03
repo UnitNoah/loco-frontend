@@ -77,6 +77,9 @@ const handleSave = async () => {
   }
 }
 
+// 데이터 변경 확인
+const isChanged = nickname !== initialNickname || previewImage !== initialImage;
+
   const handleCancel = () => {
     setNickname(initialNickname)
     setPreviewImage(initialImage)
@@ -149,6 +152,7 @@ const handleSave = async () => {
           <div className="mt-8 flex gap-4">
             <button
               onClick={handleSave}
+              disabled={!isChanged}
               className="flex-1 bg-[#0C8CE9] text-white py-3 rounded-xl hover:bg-blue-600 transition"
             >
               저장하기

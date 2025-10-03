@@ -18,17 +18,23 @@ type UserInfo = {
 }
 
 type AuthState = {
+  isInitialized: boolean   // 초기화 여부
   isLoggedIn: boolean
   user: UserInfo | null
   login: (user: UserInfo) => void
   logout: () => void
   initFromCookie: () => void
+  setUser: (user: Partial<UserInfo>) => void
+  setInitialized: (value: boolean) => void  // 타입 정의에도 추가
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
+  isInitialized: false,   // 초기화 상태
   isLoggedIn: false,
   user: null,
+
   login: (user) => set({ isLoggedIn: true, user }),
+
   logout: () => {
     fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/logout`, {
       method: 'POST',
@@ -37,10 +43,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ isLoggedIn: false, user: null })
     })
   },
+
+  // 초기화 상태 업데이트
+  setInitialized: (value) => set({ isInitialized: value }),
+
+  // 쿠키 기반 초기화
   initFromCookie: () => {
     const token = getCookie("access_token")
     if (token) {
-      debugger;
       const payload = jwtDecode<JwtPayload>(token)
       set({
         isLoggedIn: true,
@@ -49,9 +59,18 @@ export const useAuthStore = create<AuthState>((set) => ({
           nickname: payload.nickname,
           profileImage: payload.profileImage,
         },
+        isInitialized: true,
       })
+    } else {
+      set({ isInitialized: true }) // 토큰 없을 때도 초기화 완료
     }
   },
+
+  // 프로필 수정 시 user 병합 업데이트
+  setUser: (user) =>
+    set((state) => ({
+      user: { ...state.user, ...user },
+    })),
 }))
 
 // 헬퍼 함수: document.cookie에서 값 추출

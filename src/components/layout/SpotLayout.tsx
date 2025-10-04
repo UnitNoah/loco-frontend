@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import KakaoMap from '../maps/KakaoMap'
 
 const SpotLayout = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -24,15 +25,16 @@ const SpotLayout = () => {
     <div className="relative h-[calc(100vh-72px)]">
       {/* Full-bleed map background */}
       <div className="absolute inset-0 z-0">
-        <iframe
-          title="map"
-          className="w-full h-full"
-          src="https://maps.google.com/maps?q=Yongsan%20Seoul&t=&z=14&ie=UTF8&iwloc=&output=embed"
+        <KakaoMap
+          center={{ lat: 37.5326, lng: 127.024612 }}
+          width="100%"
+          height="100%"
+          level={5}
         />
       </div>
 
       {/* Overlay panels */}
-      <div className="relative z-10 h-full">
+      <div className="relative z-10 h-full pointer-events-none">
         <div className="h-full flex gap-4">
           {/* Left: list panel */}
           <div className="w-[340px] bg-white shadow overflow-hidden flex flex-col">

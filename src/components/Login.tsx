@@ -13,11 +13,10 @@ const Login: React.FC<LoginProps> = ({ open, onClose }) => {
 
   // 로그인 시작 핸들러
   const handleLogin = (provider: Provider) => {
+    // 로그인 전에 현재 페이지 기억
+    sessionStorage.setItem("redirectAfterLogin", window.location.pathname + window.location.search)
+
     const apiBase = import.meta.env.VITE_API_BASE_URL
-    if (!apiBase) {
-      console.error("VITE_API_BASE_URL 환경변수가 설정되지 않았습니다.")
-      return
-    }
     window.location.href = `${apiBase}/oauth2/authorization/${provider}`
   }
 

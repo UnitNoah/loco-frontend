@@ -35,14 +35,28 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   login: (user) => set({ isLoggedIn: true, user }),
 
-  logout: () => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    }).finally(() => {
-      set({ isLoggedIn: false, user: null })
-    })
+  logout: async () => {
+    const hasCookie = document.cookie.includes("access_token=");
+
+    try {
+      if (hasCookie) {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/logout`, {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          console.warn("서버 로그아웃 요청 실패:", res.status);
+        }
+      }
+    } catch (err) {
+      console.error("로그아웃 요청 중 에러:", err);
+    } finally {
+      set({ isLoggedIn: false, user: null });
+    }
   },
+
+
 
   // 초기화 상태 업데이트
   setInitialized: (value) => set({ isInitialized: value }),

@@ -19,29 +19,35 @@ function App() {
 
   useEffect(() => {
     const loadProfile = async () => {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/api/v1/users/profile`,
-          { credentials: "include" }
-        )
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/profile`, {
+        credentials: "include"
+      });
 
-        if (!res.ok) throw new Error("Not logged in")
+      if (!res.ok) throw new Error("Not logged in");
 
-        const data = await res.json()
-        const user = data.data
+      const data = await res.json();
+      login({
+        email: data.data.email,
+        nickname: data.data.name,
+        profileImage: data.data.profile_image,
+      });
 
-        login({
-          email: user.email,
-          nickname: user.name, // 주의: 서버 필드명이 name임
-          profileImage: user.profile_image,
-        })
-      } catch (err) {
-        logout()
-        console.log(err);
-      } finally {
-        setInitialized(true) // 성공/실패 관계없이 초기화 완료
+      // 로그인 성공 후 redirect 처리
+      const redirectPath = sessionStorage.getItem("redirectAfterLogin");
+      if (redirectPath) {
+        sessionStorage.removeItem("redirectAfterLogin");
+        window.location.replace(redirectPath);
       }
+
+    } catch (err) {
+      logout();
+      console.log(err)
+    } finally {
+      setInitialized(true);
     }
+  };
+
 
     loadProfile()
   }, [login, logout, setInitialized])

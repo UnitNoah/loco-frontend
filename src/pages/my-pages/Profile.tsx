@@ -20,7 +20,7 @@ const Profile: React.FC = () => {
 useEffect(() => {
   if (!isInitialized) return // 초기화 안 됐으면 아무 것도 하지 않음
   if (!isLoggedIn) {
-    navigate("/login")
+    navigate("/")
   }
 }, [isInitialized, isLoggedIn, navigate])
   useEffect(() => {

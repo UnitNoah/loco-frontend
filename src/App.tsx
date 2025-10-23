@@ -13,6 +13,7 @@ import JoinedSpots from './pages/my-pages/JoinedSpots'
 import Reports from './pages/my-pages/Reports'
 import Settings from './pages/my-pages/Settings'
 import Support from './pages/my-pages/Support'
+import CreateRoom from './pages/CreateRoom'
 
 function App() {
   const { login, logout, setInitialized } = useAuthStore()
@@ -24,10 +25,28 @@ function App() {
         credentials: "include"
       });
 
-      if (!res.ok) throw new Error("Not logged in");
+      if (!res.ok) {
+        console.error('Profile API failed:', res.status, res.statusText);
+        throw new Error("Not logged in");
+      }
 
       const data = await res.json();
+      console.log('Profile API response:', data); // Debug log
+      
+      // Check if data.data exists and has the expected structure
+      if (!data.data) {
+        console.error('Profile API response missing data field:', data);
+        throw new Error("Invalid profile response");
+      }
+      
+      // Check if user is actually logged in (not guest)
+      if (data.data.status === 'guest') {
+        console.log('User is not logged in (guest status)');
+        throw new Error("Not logged in");
+      }
+      
       login({
+        id: parseInt(data.data.user_id), // Convert string to number
         email: data.data.email,
         nickname: data.data.name,
         profileImage: data.data.profile_image,
@@ -67,6 +86,7 @@ function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
           <Route path="support" element={<Support />} />
+          <Route path="room/create" element={<CreateRoom />} />
           <Route path="*" element={<div>404 - Not Found</div>} />
         </Route>
       </Routes>

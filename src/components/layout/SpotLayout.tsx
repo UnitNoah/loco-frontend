@@ -1,8 +1,17 @@
 import { useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import KakaoMap from '../maps/KakaoMap'
+import { useRoom } from '../../hooks/queries/useSpots'
 
 const SpotLayout = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  
+  // Get room ID from URL parameters
+  const { id } = useParams<{ id: string }>()
+  const roomIdNumber = id ? parseInt(id, 10) : 0
+
+  // Fetch room details from URL parameter (only when roomId exists)
+  const { data: room, isLoading: roomLoading, error: roomError } = useRoom(roomIdNumber)
 
   const listItems = useMemo(
     () =>
@@ -39,24 +48,92 @@ const SpotLayout = () => {
           {/* Left: list panel */}
           <div className="w-[340px] bg-white shadow overflow-hidden flex flex-col pointer-events-auto">
             <div className="relative h-[288px]">
-              <img
-                src={`https://picsum.photos/seed/cover${selectedId ?? 1}/800/480`}
-                alt="cover"
-                className="w-full h-44 object-cover"
-              />
+              {roomLoading ? (
+                <div className="w-full h-44 bg-gray-200 animate-pulse flex items-center justify-center">
+                  <div className="text-gray-500">Loading room...</div>
+                </div>
+              ) : roomError ? (
+                <div className="w-full h-44 bg-red-100 flex items-center justify-center">
+                  <div className="text-red-600">Failed to load room</div>
+                </div>
+              ) : (
+                <img
+                  src={room?.thumbnail || (roomIdNumber > 0 ? `https://picsum.photos/seed/cover${roomIdNumber}/800/480` : 'https://picsum.photos/seed/default/800/480')}
+                  alt="cover"
+                  className="w-full h-[288px] object-cover"
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               <div className="absolute left-4 bottom-4 right-4 text-white">
-                <p className="text-lg font-semibold mb-2">
-                  내가 좋아하는 서울 디저트 맛집 모음
-                </p>
-                <div className="flex gap-2 justify-between">
-                  <button className="px-3 py-1.5 bg-[#01BF4F] w-[128px] rounded-md text-sm">
-                    장소 등록
-                  </button>
-                  <button className="px-3 py-1.5 bg-[#EB5454] w-[128px] rounded-md text-sm">
-                    스팟 저장
-                  </button>
-                </div>
+                {roomLoading ? (
+                  <div className="animate-pulse">
+                    <div className="h-6 bg-white/30 rounded mb-2"></div>
+                    <div className="h-4 bg-white/30 rounded mb-3 w-3/4"></div>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 bg-white/30 rounded-full"></div>
+                      <div className="h-4 bg-white/30 rounded w-20"></div>
+                      <div className="h-4 bg-white/30 rounded w-12"></div>
+                    </div>
+                    <div className="flex gap-2 justify-between">
+                      <div className="h-8 bg-white/30 rounded w-[128px]"></div>
+                      <div className="h-8 bg-white/30 rounded w-[128px]"></div>
+                    </div>
+                  </div>
+                ) : roomError ? (
+                  <div>
+                    <p className="text-lg font-semibold mb-2 text-red-200">
+                      Error loading room
+                    </p>
+                    <div className="flex gap-2 justify-between">
+                      <button className="px-3 py-1.5 bg-[#01BF4F] w-[128px] rounded-md text-sm">
+                        장소 등록
+                      </button>
+                      <button className="px-3 py-1.5 bg-[#EB5454] w-[128px] rounded-md text-sm">
+                        스팟 나가기
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    {/* Room Title */}
+                    <p className="text-lg font-semibold mb-2">
+                      {room?.name || '내가 좋아하는 서울 디저트 맛집 모음'}
+                    </p>
+                    
+                    {/* Room Description */}
+                    <p className="text-sm text-white/90 mb-3 leading-relaxed">
+                      {room?.description || '모두가 알면 좋겠다 싶은 디저트 가게 모음입니다'}
+                    </p>
+                    
+                    {/* Host Info */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <img
+                        src={room?.host?.profileImage || 'https://picsum.photos/seed/profile/32/32'}
+                        alt="host profile"
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <span className="text-sm font-medium">
+                        {room?.host?.nickname || 'new_iceCream?'}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+                        </svg>
+                        <span className="text-xs">3명</span>
+                      </div>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 justify-between">
+                      <button className="px-3 py-1.5 bg-[#01BF4F] w-[128px] rounded-md text-sm">
+                        장소 등록
+                      </button>
+                      <button className="px-3 py-1.5 bg-[#EB5454] w-[128px] rounded-md text-sm">
+                        스팟 나가기
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

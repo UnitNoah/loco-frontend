@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { jwtDecode } from "jwt-decode"
 
 type JwtPayload = {
+  id?: number
   email?: string
   nickname?: string
   profileImage?: string
@@ -12,6 +13,7 @@ type JwtPayload = {
 
 // UserInfo는 프론트 전역 상태에서 쓰이는 유저 정보 타입
 type UserInfo = {
+  id?: number
   email?: string
   nickname?: string
   profileImage?: string
@@ -69,6 +71,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({
         isLoggedIn: true,
         user: {
+          id: payload.id,
           email: payload.email,
           nickname: payload.nickname,
           profileImage: payload.profileImage,

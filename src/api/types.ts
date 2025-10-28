@@ -13,41 +13,32 @@ export interface User {
   profileImage?: string
 }
 
-// Room types (matches your backend Room entity)
+// Room types (matches backend RoomResponse - snake_case)
 export interface Room {
   id: number
   name: string
   description: string
-  isPrivate: boolean
-  inviteCode?: string
-  thumbnail?: string
-  host: User
-  createdAt: string
-  updatedAt: string
-  deletedAt?: string
-}
-
-// Room participant
-export interface RoomParticipant {
-  id: number
-  userId: number
-  roomId: number
-  joinedAt: string
-  user?: User
+  is_private: boolean
+  thumbnail?: string | null
+  host_id: number
+  invite_code?: string
+  host_nickname?: string
+  host_profile_image_url?: string
+  member_count: number
 }
 
 // Request types (matches your backend DTOs)
 export interface RoomCreateRequest {
   name: string
   description?: string
-  is_private?: boolean
+  isPrivate?: boolean
   thumbnail?: string
 }
 
 export interface RoomUpdateRequest {
   name?: string
   description?: string
-  is_private?: boolean
+  isPrivate?: boolean
   thumbnail?: string
 }
 

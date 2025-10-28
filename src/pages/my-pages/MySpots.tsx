@@ -1,18 +1,22 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import Sidebar from "../../components/layout/Sidebar"
 import SpotListCard from "../../components/SpotListCard"
-import { useJoinedRooms, useLeaveRoom } from "../../hooks/queries/useSpots"
+import EditRoomModal from "../../components/EditRoomModal"
+import DeleteRoomModal from "../../components/DeleteRoomModal"
+import { useHostedRooms, useDeleteRoom, useUpdateRoom } from "../../hooks/queries/useSpots"
 import { useAuthStore } from "../../store/authStore"
+import type { Room } from "../../api/types"
 
-const JoinedSpots = () => {
-  const navigate = useNavigate()
+const MySpots = () => {
   const { user } = useAuthStore()
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 8 // 2줄 * 4개
+  const [editingRoom, setEditingRoom] = useState<Room | null>(null)
+  const [deletingRoomId, setDeletingRoomId] = useState<number | null>(null)
 
-  const { data: rooms = [], isLoading, error } = useJoinedRooms(user?.id || 0)
-  const leaveRoomMutation = useLeaveRoom(user?.id || 0)
+  const { data: rooms = [], isLoading, error } = useHostedRooms(user?.id || 0)
+  const deleteRoomMutation = useDeleteRoom(user?.id || 0)
+  const updateRoomMutation = useUpdateRoom(user?.id || 0)
 
   // Convert Room to SpotCard format
   const spotCards = rooms.map((room) => ({
@@ -36,23 +40,57 @@ const JoinedSpots = () => {
     currentPage * itemsPerPage
   )
 
-  const handleLeaveRoom = (roomId: number) => {
-    if (!user?.id) {
-      alert('로그인이 필요합니다.')
-      return
+  const handleEditClick = (cardId: number) => {
+    const room = rooms.find((r) => r.id === cardId)
+    if (room) {
+      setEditingRoom(room)
     }
-
-    if (!confirm('스팟에서 나가시겠습니까?')) {
-      return
-    }
-
-    leaveRoomMutation.mutate(roomId, {
-      onError: (error: any) => {
-        console.error('Failed to leave room:', error)
-        alert('스팟 나가기에 실패했습니다: ' + (error.response?.data?.message || error.message))
-      },
-    })
   }
+
+  const handleUpdate = (data: { name: string; description: string; thumbnail?: string }) => {
+    if (!editingRoom) return
+
+    updateRoomMutation.mutate(
+      {
+        roomId: editingRoom.id,
+        data: {
+          name: data.name,
+          description: data.description,
+          thumbnail: data.thumbnail,
+        },
+      },
+      {
+        onSuccess: () => {
+          setEditingRoom(null)
+        },
+        onError: (error) => {
+          console.error('Failed to update room:', error)
+          alert('스팟 수정에 실패했습니다.')
+        },
+      }
+    )
+  }
+
+  const handleDeleteClick = (cardId: number) => {
+    setDeletingRoomId(cardId)
+  }
+
+  const handleDeleteConfirm = () => {
+    if (deletingRoomId !== null) {
+      deleteRoomMutation.mutate(deletingRoomId, {
+        onSuccess: () => {
+          setDeletingRoomId(null)
+        },
+        onError: (error) => {
+          console.error('Failed to delete room:', error)
+          alert('스팟 삭제에 실패했습니다.')
+          setDeletingRoomId(null)
+        },
+      })
+    }
+  }
+
+  const deletingRoom = rooms.find((r) => r.id === deletingRoomId)
 
   return (
     <div className="flex min-h-screen">
@@ -61,7 +99,7 @@ const JoinedSpots = () => {
 
       {/* 우측: 콘텐츠 */}
       <main className="flex-1 bg-gray-50 p-6">
-        <h1 className="text-2xl font-bold mb-3 ml-6 mt-6">내가 참여한 스팟</h1>
+        <h1 className="text-2xl font-bold mb-3 ml-6 mt-6">내 스팟</h1>
 
         {/* Loading state */}
         {isLoading && (
@@ -80,7 +118,7 @@ const JoinedSpots = () => {
         {/* Empty state */}
         {!isLoading && !error && spotCards.length === 0 && (
           <div className="flex justify-center items-center h-64">
-            <p className="text-gray-500">참여한 스팟이 없습니다.</p>
+            <p className="text-gray-500">생성한 스팟이 없습니다.</p>
           </div>
         )}
 
@@ -101,10 +139,10 @@ const JoinedSpots = () => {
                 isLiked={card.isLiked}
                 numOfLikes={card.numOfLikes}
                 createdAt={card.createdAt}
-                mode="member"
-                onCardClick={() => navigate(`/spot/${card.id}`)}
-                onLeaveClick={() => handleLeaveRoom(card.id)}
-                onLikeClick={() => console.log(`Liked ${card.title}`)}
+                mode="owner"
+                onCardClick={() => console.log(`Clicked on ${card.title}`)}
+                onEditClick={() => handleEditClick(card.id)}
+                onDeleteClick={() => handleDeleteClick(card.id)}
               />
             ))}
           </div>
@@ -129,8 +167,26 @@ const JoinedSpots = () => {
           </div>
         )}
       </main>
+
+      {/* Edit Room Modal */}
+      <EditRoomModal
+        room={editingRoom}
+        isOpen={!!editingRoom}
+        onClose={() => setEditingRoom(null)}
+        onUpdate={handleUpdate}
+        isUpdating={updateRoomMutation.isPending}
+      />
+
+      {/* Delete Room Modal */}
+      <DeleteRoomModal
+        roomTitle={deletingRoom?.name || ''}
+        isOpen={!!deletingRoomId}
+        onClose={() => setDeletingRoomId(null)}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={deleteRoomMutation.isPending}
+      />
     </div>
   )
 }
 
-export default JoinedSpots
+export default MySpots

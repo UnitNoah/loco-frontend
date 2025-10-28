@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import KakaoMap from '../maps/KakaoMap'
-import { useRoom } from '../../hooks/queries/useSpots'
+import { usePublicRoom, useJoinRoom, useLeaveRoom, useJoinedRooms } from '../../hooks/queries/useSpots'
+import { useAuthStore } from '../../store/authStore'
 
 const SpotLayout = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -10,8 +11,56 @@ const SpotLayout = () => {
   const { id } = useParams<{ id: string }>()
   const roomIdNumber = id ? parseInt(id, 10) : 0
 
+  // Get user from auth store
+  const { user } = useAuthStore()
+
   // Fetch room details from URL parameter (only when roomId exists)
-  const { data: room, isLoading: roomLoading, error: roomError } = useRoom(roomIdNumber)
+  const { data: room, isLoading: roomLoading, error: roomError } = usePublicRoom(roomIdNumber)
+
+  // Fetch user's joined rooms to check membership
+  const { data: joinedRooms = [] } = useJoinedRooms(user?.id || 0)
+  
+  // Check if user is a member of this room
+  const isMember = joinedRooms.some(joinedRoom => joinedRoom.id === roomIdNumber)
+
+  // Join/Leave mutations
+  const joinRoomMutation = useJoinRoom(user?.id || 0)
+  const leaveRoomMutation = useLeaveRoom(user?.id || 0)
+
+  const handleJoinRoom = () => {
+    if (!user?.id) {
+      alert('로그인이 필요합니다.')
+      return
+    }
+
+    joinRoomMutation.mutate(
+      { roomId: roomIdNumber },
+      {
+        onError: (error: any) => {
+          console.error('Failed to join room:', error)
+          alert('스팟 참여에 실패했습니다: ' + (error.response?.data?.message || error.message))
+        },
+      }
+    )
+  }
+
+  const handleLeaveRoom = () => {
+    if (!user?.id) {
+      alert('로그인이 필요합니다.')
+      return
+    }
+
+    if (!confirm('스팟에서 나가시겠습니까?')) {
+      return
+    }
+
+    leaveRoomMutation.mutate(roomIdNumber, {
+      onError: (error: any) => {
+        console.error('Failed to leave room:', error)
+        alert('스팟 나가기에 실패했습니다: ' + (error.response?.data?.message || error.message))
+      },
+    })
+  }
 
   const listItems = useMemo(
     () =>
@@ -108,29 +157,48 @@ const SpotLayout = () => {
                     {/* Host Info */}
                     <div className="flex items-center gap-3 mb-4">
                       <img
-                        src={room?.host?.profileImage || 'https://picsum.photos/seed/profile/32/32'}
+                        src={room?.host_profile_image_url || 'https://picsum.photos/seed/profile/32/32'}
                         alt="host profile"
                         className="w-8 h-8 rounded-full object-cover"
                       />
                       <span className="text-sm font-medium">
-                        {room?.host?.nickname || 'new_iceCream?'}
+                        {room?.host_nickname || 'new_iceCream?'}
                       </span>
                       <div className="flex items-center gap-1">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                         </svg>
-                        <span className="text-xs">3명</span>
+                        <span className="text-xs">{room?.member_count || 1}명</span>
                       </div>
                     </div>
                     
                     {/* Action Buttons */}
                     <div className="flex gap-2 justify-between">
-                      <button className="px-3 py-1.5 bg-[#01BF4F] w-[128px] rounded-md text-sm">
-                        장소 등록
-                      </button>
-                      <button className="px-3 py-1.5 bg-[#EB5454] w-[128px] rounded-md text-sm">
-                        스팟 나가기
-                      </button>
+                      {!isMember ? (
+                        <button
+                          onClick={handleJoinRoom}
+                          disabled={joinRoomMutation.isPending || !user?.id}
+                          className="w-full bg-[#0C8CE9] text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {joinRoomMutation.isPending ? '참여 중...' : '스팟 참여하기'}
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => console.log('Register place')}
+                            className="px-3 py-1.5 bg-[#01BF4F] w-[128px] rounded-md text-sm font-medium hover:bg-green-600 transition-colors"
+                          >
+                            장소 등록
+                          </button>
+                          <button
+                            onClick={handleLeaveRoom}
+                            disabled={leaveRoomMutation.isPending}
+                            className="px-3 py-1.5 bg-[#EB5454] w-[128px] rounded-md text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {leaveRoomMutation.isPending ? '나가는 중...' : '스팟 나가기'}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}

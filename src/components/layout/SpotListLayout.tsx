@@ -32,7 +32,7 @@ const SpotListLayout = () => {
         searchQuery === '' || 
         room.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         room.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        room.host?.nickname?.toLowerCase().includes(searchQuery.toLowerCase())
+        room.host_nickname?.toLowerCase().includes(searchQuery.toLowerCase())
       )
       .map(room => ({
         id: room.id,
@@ -40,12 +40,12 @@ const SpotListLayout = () => {
         desc: room.description || 'No description available',
         hashtags: [], // TODO: Add hashtags from room data when available
         image: room.thumbnail || '/public/vite.svg', // Fallback image
-        username: room.host?.nickname || 'Unknown User',
-        memberCount: 1, // TODO: Get actual member count from room data
-        userAvatar: room.host?.profileImage,
+        username: room.host_nickname || 'Unknown User',
+        memberCount: room.member_count || 1,
+        userAvatar: room.host_profile_image_url,
         isLiked: false, // TODO: Get actual like status from user data
         numOfLikes: 0, // TODO: Get actual like count from room data
-        createdAt: new Date(room.createdAt || new Date())
+        createdAt: new Date()
       }))
   }, [currentRooms, searchQuery])
 

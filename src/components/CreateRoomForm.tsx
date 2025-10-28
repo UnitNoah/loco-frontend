@@ -25,7 +25,7 @@ function CreateRoomForm() {
     createRoom({
       name,
       description,
-      is_private: isPrivate,
+      isPrivate,
       thumbnail: undefined // optional
     }, {
       onSuccess: (newRoom) => {

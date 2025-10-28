@@ -10,11 +10,20 @@ import type {
 const ROOMS_ENDPOINT = '/api/v1/rooms'
 
 /**
- * Fetch a single room by ID
- * GET /api/v1/rooms/{roomId}
+ * Fetch a public room by ID
+ * GET /api/v1/rooms/public/{roomId}
  */
-export const getRoomById = async (roomId: number): Promise<Room> => {
-  const response = await apiClient.get<ApiResponse<Room>>(`${ROOMS_ENDPOINT}/${roomId}`)
+export const getPublicRoomById = async (roomId: number): Promise<Room> => {
+  const response = await apiClient.get<ApiResponse<Room>>(`${ROOMS_ENDPOINT}/public/${roomId}`)
+  return response.data.data
+}
+
+/**
+ * Fetch a private room by ID
+ * GET /api/v1/rooms/private/{roomId}
+ */
+export const getPrivateRoomById = async (roomId: number): Promise<Room> => {
+  const response = await apiClient.get<ApiResponse<Room>>(`${ROOMS_ENDPOINT}/private/${roomId}`)
   return response.data.data
 }
 
@@ -83,18 +92,30 @@ export const updateRoom = async (
  * Delete a room
  * DELETE /api/v1/rooms/{roomId}?requesterId={requesterId}
  */
-export const deleteRoom = async (roomId: number, requesterId: number): Promise<void> => {
-  await apiClient.delete(`${ROOMS_ENDPOINT}/${roomId}`, {
+export const deleteRoom = async (roomId: number, requesterId: number): Promise<number> => {
+  const response = await apiClient.delete<ApiResponse<number>>(`${ROOMS_ENDPOINT}/${roomId}`, {
     params: { requesterId }
   })
+  return response.data.data
 }
 
 /**
- * Get rooms the user is part of (host + participant)
- * GET /api/v1/rooms/my?userId={userId}
+ * Get rooms where user is host
+ * GET /api/v1/rooms/hosted?userId={userId}
  */
-export const getMyRooms = async (userId: number): Promise<Room[]> => {
-  const response = await apiClient.get<ApiResponse<Room[]>>(`${ROOMS_ENDPOINT}/my`, {
+export const getHostedRooms = async (userId: number): Promise<Room[]> => {
+  const response = await apiClient.get<ApiResponse<Room[]>>(`${ROOMS_ENDPOINT}/hosted`, {
+    params: { userId }
+  })
+  return response.data.data
+}
+
+/**
+ * Get rooms where user is participant
+ * GET /api/v1/rooms/joined?userId={userId}
+ */
+export const getJoinedRooms = async (userId: number): Promise<Room[]> => {
+  const response = await apiClient.get<ApiResponse<Room[]>>(`${ROOMS_ENDPOINT}/joined`, {
     params: { userId }
   })
   return response.data.data
@@ -108,19 +129,21 @@ export const joinRoom = async (
   roomId: number,
   userId: number,
   inviteCode?: string
-): Promise<void> => {
-  await apiClient.post(`${ROOMS_ENDPOINT}/${roomId}/join`, null, {
+): Promise<Room> => {
+  const response = await apiClient.post<ApiResponse<Room>>(`${ROOMS_ENDPOINT}/${roomId}/join`, null, {
     params: { userId, inviteCode }
   })
+  return response.data.data
 }
 
 /**
  * Leave a room
  * POST /api/v1/rooms/{roomId}/leave?userId={userId}
  */
-export const leaveRoom = async (roomId: number, userId: number): Promise<void> => {
-  await apiClient.post(`${ROOMS_ENDPOINT}/${roomId}/leave`, null, {
+export const leaveRoom = async (roomId: number, userId: number): Promise<Room> => {
+  const response = await apiClient.post<ApiResponse<Room>>(`${ROOMS_ENDPOINT}/${roomId}/leave`, null, {
     params: { userId }
   })
+  return response.data.data
 }
 

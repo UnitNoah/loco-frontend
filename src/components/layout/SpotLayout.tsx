@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate  } from 'react-router-dom'
 import KakaoMap from '../maps/KakaoMap'
 import { usePublicRoom, useJoinRoom, useLeaveRoom, useJoinedRooms } from '../../hooks/queries/useSpots'
 import { useAuthStore } from '../../store/authStore'
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import PlaceCreateModal from '../modal/PlaceCreateModal'
 
 const SpotLayout = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -21,7 +23,19 @@ const SpotLayout = () => {
   const { data: joinedRooms = [] } = useJoinedRooms(user?.id || 0)
   
   // Check if user is a member of this room
-  const isMember = joinedRooms.some(joinedRoom => joinedRoom.id === roomIdNumber)
+  // const isMember = joinedRooms.some(joinedRoom => joinedRoom.id === roomIdNumber)
+
+  // Determine if the current user is a member or host of the room
+  const isHost = useMemo(() => {
+    if (!room || !user) return false
+    return String(room.host_id) === String(user.id)
+  }, [room, user])
+
+  // Check if the user has already joined this room
+  const isJoined = joinedRooms.some(joinedRoom => joinedRoom.id === roomIdNumber)
+
+// User is considered a member if they are either the host or already joined
+const isMember = isHost || isJoined
 
   // Join/Leave mutations
   const joinRoomMutation = useJoinRoom(user?.id || 0)
@@ -73,11 +87,21 @@ const SpotLayout = () => {
     []
   )
 
+  // React Router navigation
+  const navigate = useNavigate();
+
   const handleSelect = (spotId: number) => {
     setSelectedId(spotId)
   }
 
   const hasDetail = selectedId !== null
+
+  const handleGoBack = () => {
+    // Simply go back to the previous page
+    navigate('/')
+  }
+
+  const [isPlaceModalOpen, setIsPlaceModalOpen] = useState(false);
 
   return (
     <div className="relative h-[calc(100vh-72px)]">
@@ -97,6 +121,14 @@ const SpotLayout = () => {
           {/* Left: list panel */}
           <div className="w-[340px] bg-white shadow overflow-hidden flex flex-col pointer-events-auto">
             <div className="relative h-[288px]">
+              {/* Back button placed at top-left corner of left list */}
+                <button
+                  type="button"
+                  onClick={handleGoBack}
+                  className="absolute top-3 left-3 z-20 inline-flex items-center gap-1 rounded-md bg-white/90 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-white shadow"
+                >
+                <ArrowLeftIcon className="w-5 h-5 text-gray-700" />
+                </button>
               {roomLoading ? (
                 <div className="w-full h-44 bg-gray-200 animate-pulse flex items-center justify-center">
                   <div className="text-gray-500">Loading room...</div>
@@ -134,7 +166,7 @@ const SpotLayout = () => {
                       Error loading room
                     </p>
                     <div className="flex gap-2 justify-between">
-                      <button className="px-3 py-1.5 bg-[#01BF4F] w-[128px] rounded-md text-sm">
+                      <button onClick={() => setIsPlaceModalOpen(true)} className="px-3 py-1.5 bg-[#01BF4F] w-[128px] rounded-md text-sm">
                         장소 등록
                       </button>
                       <button className="px-3 py-1.5 bg-[#EB5454] w-[128px] rounded-md text-sm">
@@ -185,7 +217,7 @@ const SpotLayout = () => {
                       ) : (
                         <>
                           <button
-                            onClick={() => console.log('Register place')}
+                            onClick={() => setIsPlaceModalOpen(true)}
                             className="px-3 py-1.5 bg-[#01BF4F] w-[128px] rounded-md text-sm font-medium hover:bg-green-600 transition-colors"
                           >
                             장소 등록
@@ -339,6 +371,9 @@ const SpotLayout = () => {
           )}
         </div>
       </div>
+          {isPlaceModalOpen && (
+      <PlaceCreateModal onClose={() => setIsPlaceModalOpen(false)} />
+    )}
     </div>
   )
 }

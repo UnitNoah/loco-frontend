@@ -38,22 +38,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: (user) => set({ isLoggedIn: true, user }),
 
   logout: async () => {
-    const hasCookie = document.cookie.includes("access_token=");
-
     try {
-      if (hasCookie) {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/logout`, {
-          method: "POST",
-          credentials: "include",
-        });
-
-        if (!res.ok) {
-          console.warn("서버 로그아웃 요청 실패:", res.status);
-        }
-      }
+      await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/logout`, {
+        method: "POST",
+        credentials: "include", // include cookie
+      });
     } catch (err) {
-      console.error("로그아웃 요청 중 에러:", err);
+      console.error("Logout request failed:", err);
     } finally {
+      // Regardless of result, clear client state
       set({ isLoggedIn: false, user: null });
     }
   },

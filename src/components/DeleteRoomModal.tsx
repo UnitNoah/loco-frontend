@@ -6,7 +6,7 @@ interface DeleteRoomModalProps {
   isDeleting: boolean
 }
 
-function DeleteRoomModal({ roomTitle, isOpen, onClose, onConfirm, isDeleting }: DeleteRoomModalProps) {
+function DeleteRoomModal({ roomTitle: _roomTitle, isOpen, onClose, onConfirm, isDeleting }: DeleteRoomModalProps) {
   if (!isOpen) return null
 
   return (

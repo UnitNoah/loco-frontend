@@ -1,28 +1,56 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Room } from '../api/types'
 
-interface EditRoomModalProps {
-  room: Room | null
+interface RoomModalProps {
+  room?: Room | null
   isOpen: boolean
   onClose: () => void
-  onUpdate: (data: { name: string; description: string; thumbnail?: string }) => void
-  isUpdating: boolean
+  onSubmit: (data: { name: string; description: string; thumbnail?: string; isPrivate?: boolean }) => void
+  isSubmitting: boolean
+  mode?: 'create' | 'edit'
 }
 
-function EditRoomModal({ room, isOpen, onClose, onUpdate, isUpdating }: EditRoomModalProps) {
+function RoomModal({ room, isOpen, onClose, onSubmit, isSubmitting, mode = room ? 'edit' : 'create' }: RoomModalProps) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [thumbnail, setThumbnail] = useState<string | undefined>('')
   const [imagePreview, setImagePreview] = useState<string>('')
+  const [isPrivate, setIsPrivate] = useState(false)
+  const prevSubmittingRef = useRef(false)
 
+  // Reset form after successful submission
+  useEffect(() => {
+    if (prevSubmittingRef.current && !isSubmitting && mode === 'create') {
+      // Form was just submitted successfully, reset fields
+      setName('')
+      setDescription('')
+      setThumbnail('')
+      setImagePreview('')
+      setIsPrivate(false)
+    }
+    prevSubmittingRef.current = isSubmitting
+  }, [isSubmitting, mode])
+
+  // Load room data when editing or reset form when opening in create mode
   useEffect(() => {
     if (room) {
+      // Edit mode: load room data
       setName(room.name || '')
       setDescription(room.description || '')
       setThumbnail(room.thumbnail || '')
       setImagePreview(room.thumbnail || '')
+      setIsPrivate(room.is_private || false)
+    } else if (mode === 'create' && isOpen) {
+      // Create mode: reset form when modal opens (if not just submitted)
+      if (!isSubmitting) {
+        setName('')
+        setDescription('')
+        setThumbnail('')
+        setImagePreview('')
+        setIsPrivate(false)
+      }
     }
-  }, [room])
+  }, [room, mode, isOpen, isSubmitting])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -39,15 +67,33 @@ function EditRoomModal({ room, isOpen, onClose, onUpdate, isUpdating }: EditRoom
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onUpdate({ name, description, thumbnail })
+    onSubmit({ name, description, thumbnail, isPrivate })
+  }
+
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only close if clicking the backdrop itself, not the modal content
+    if (e.target === e.currentTarget && !isSubmitting) {
+      onClose()
+    }
   }
 
   if (!isOpen) return null
 
+  const isEditMode = mode === 'edit'
+  const title = isEditMode ? '스팟 정보 수정' : '새로운 스팟 생성'
+  const submitText = isSubmitting ? (isEditMode ? '수정 중...' : '생성 중...') : (isEditMode ? '수정' : '생성')
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-8">
-        <h2 className="text-2xl font-bold mb-6">스팟 정보 수정</h2>
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
+      onClick={handleBackdropClick}
+    >
+      <div 
+        className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-8"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="text-2xl font-bold mb-6">{title}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* 스팟 대표 이미지 */}
@@ -128,19 +174,35 @@ function EditRoomModal({ room, isOpen, onClose, onUpdate, isUpdating }: EditRoom
             </p>
           </div>
 
+          {/* 비공개 스팟 체크박스 - Show for create mode or allow editing */}
+          {!isEditMode && (
+            <div className="flex items-center">
+              <input
+                id="isPrivate"
+                type="checkbox"
+                checked={isPrivate}
+                onChange={(e) => setIsPrivate(e.target.checked)}
+                className="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="isPrivate" className="ml-2 block text-sm text-gray-700">
+                비공개 스팟
+              </label>
+            </div>
+          )}
+
           {/* 액션 버튼 */}
           <div className="flex gap-3 pt-4">
             <button
               type="submit"
-              disabled={isUpdating || !name.trim()}
+              disabled={isSubmitting || !name.trim()}
               className="flex-1 bg-blue-500 text-white py-3 px-4 rounded-md text-base font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isUpdating ? '수정 중...' : '수정'}
+              {submitText}
             </button>
             <button
               type="button"
               onClick={onClose}
-              disabled={isUpdating}
+              disabled={isSubmitting}
               className="flex-1 bg-white text-gray-700 border border-gray-300 py-3 px-4 rounded-md text-base font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               취소
@@ -152,5 +214,5 @@ function EditRoomModal({ room, isOpen, onClose, onUpdate, isUpdating }: EditRoom
   )
 }
 
-export default EditRoomModal
+export default RoomModal
 

@@ -4,9 +4,10 @@ import logo from "../../assets/images/logo.svg"
 
 type HeaderProps = {
   onLoginClick?: () => void
+  onCreateRoomClick?: () => void
 }
 
-const Header = ({ onLoginClick }: HeaderProps) => {
+const Header = ({ onLoginClick, onCreateRoomClick }: HeaderProps) => {
   const { isLoggedIn, user, logout } = useAuthStore()
   const location = useLocation()
   const currentPath = location.pathname
@@ -75,7 +76,7 @@ const Header = ({ onLoginClick }: HeaderProps) => {
         <button
           onClick={() => {
             if (isLoggedIn) {
-              window.location.href = "/room/create"
+              onCreateRoomClick?.()
             } else {
               onLoginClick?.()
             }

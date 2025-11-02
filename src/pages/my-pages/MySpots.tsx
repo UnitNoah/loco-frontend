@@ -1,7 +1,7 @@
 import { useState } from "react"
 import Sidebar from "../../components/layout/Sidebar"
 import SpotListCard from "../../components/SpotListCard"
-import EditRoomModal from "../../components/EditRoomModal"
+import RoomModal from "../../components/RoomModal"
 import DeleteRoomModal from "../../components/DeleteRoomModal"
 import { useHostedRooms, useDeleteRoom, useUpdateRoom } from "../../hooks/queries/useSpots"
 import { useAuthStore } from "../../store/authStore"
@@ -47,7 +47,7 @@ const MySpots = () => {
     }
   }
 
-  const handleUpdate = (data: { name: string; description: string; thumbnail?: string }) => {
+  const handleUpdate = (data: { name: string; description: string; thumbnail?: string; isPrivate?: boolean }) => {
     if (!editingRoom) return
 
     updateRoomMutation.mutate(
@@ -57,6 +57,7 @@ const MySpots = () => {
           name: data.name,
           description: data.description,
           thumbnail: data.thumbnail,
+          isPrivate: data.isPrivate,
         },
       },
       {
@@ -169,12 +170,13 @@ const MySpots = () => {
       </main>
 
       {/* Edit Room Modal */}
-      <EditRoomModal
+      <RoomModal
         room={editingRoom}
         isOpen={!!editingRoom}
         onClose={() => setEditingRoom(null)}
-        onUpdate={handleUpdate}
-        isUpdating={updateRoomMutation.isPending}
+        onSubmit={handleUpdate}
+        isSubmitting={updateRoomMutation.isPending}
+        mode="edit"
       />
 
       {/* Delete Room Modal */}

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useParams, useNavigate  } from 'react-router-dom'
 import KakaoMap from '../maps/KakaoMap'
-import { usePublicRoom, useJoinRoom, useLeaveRoom, useJoinedRooms } from '../../hooks/queries/useSpots'
+import { usePublicRoom, usePrivateRoom, useJoinRoom, useLeaveRoom, useJoinedRooms } from '../../hooks/queries/useSpots'
 import { useAuthStore } from '../../store/authStore'
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import PlaceCreateModal from '../modal/PlaceCreateModal'
@@ -16,8 +16,21 @@ const SpotLayout = () => {
   // Get user from auth store
   const { user } = useAuthStore()
 
-  // Fetch room details from URL parameter (only when roomId exists)
-  const { data: room, isLoading: roomLoading, error: roomError } = usePublicRoom(roomIdNumber)
+  // Fetch room details - try both public and private
+  const { data: publicRoom, isLoading: publicLoading, error: publicError } = usePublicRoom(roomIdNumber, { 
+    retry: false,
+    staleTime: Infinity 
+  })
+  const { data: privateRoom, isLoading: privateLoading, error: privateError } = usePrivateRoom(roomIdNumber, {
+    retry: false,
+    staleTime: Infinity
+  })
+  
+  // Determine which room data to use
+  const room = publicRoom || privateRoom
+  const roomLoading = publicLoading || privateLoading
+  // Only show error if both queries fail
+  const roomError = publicError && privateError && !publicRoom && !privateRoom ? privateError : null
 
   // Fetch user's joined rooms to check membership
   const { data: joinedRooms = [] } = useJoinedRooms(user?.id || 0)
@@ -178,29 +191,29 @@ const isMember = isHost || isJoined
                   <div>
                     {/* Room Title */}
                     <p className="text-lg font-semibold mb-2">
-                      {room?.name || '내가 좋아하는 서울 디저트 맛집 모음'}
+                      {room?.name}
                     </p>
                     
                     {/* Room Description */}
                     <p className="text-sm text-white/90 mb-3 leading-relaxed">
-                      {room?.description || '모두가 알면 좋겠다 싶은 디저트 가게 모음입니다'}
+                      {room?.description}
                     </p>
                     
                     {/* Host Info */}
                     <div className="flex items-center gap-3 mb-4">
                       <img
-                        src={room?.host_profile_image_url || 'https://picsum.photos/seed/profile/32/32'}
+                        src={room?.host_profile_image_url}
                         alt="host profile"
                         className="w-8 h-8 rounded-full object-cover"
                       />
                       <span className="text-sm font-medium">
-                        {room?.host_nickname || 'new_iceCream?'}
+                        {room?.host_nickname}
                       </span>
                       <div className="flex items-center gap-1">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                         </svg>
-                        <span className="text-xs">{room?.member_count || 1}명</span>
+                        <span className="text-xs">{room?.member_count}명</span>
                       </div>
                     </div>
                     

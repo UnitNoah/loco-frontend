@@ -54,13 +54,21 @@ export const createRoom = async (data: RoomCreateRequest, hostId: number): Promi
   const url = new URL(`${import.meta.env.VITE_API_BASE_URL}${ROOMS_ENDPOINT}`)
   url.searchParams.set('hostId', hostId.toString())
   
+  // Spring Boot Jackson maps Boolean fields like isPrivate to "private" in JSON
+  const requestBody = {
+    name: data.name,
+    description: data.description,
+    is_private: data.isPrivate, // Backend expects 'private' not 'isPrivate'
+    thumbnail: data.thumbnail,
+  }
+  
   const response = await fetch(url.toString(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include', // Important for cookies
-    body: JSON.stringify(data),
+    body: JSON.stringify(requestBody),
   })
 
   if (!response.ok) {
@@ -80,9 +88,16 @@ export const updateRoom = async (
   requesterId: number,
   data: RoomUpdateRequest
 ): Promise<Room> => {
+  // Spring Boot Jackson maps Boolean fields like isPrivate to "private" in JSON
+  const requestBody: any = {}
+  if (data.name !== undefined) requestBody.name = data.name
+  if (data.description !== undefined) requestBody.description = data.description
+  if (data.isPrivate !== undefined) requestBody.is_private = data.isPrivate
+  if (data.thumbnail !== undefined) requestBody.thumbnail = data.thumbnail
+  
   const response = await apiClient.patch<ApiResponse<Room>>(
     `${ROOMS_ENDPOINT}/${roomId}`,
-    data,
+    requestBody,
     { params: { requesterId } }
   )
   return response.data.data

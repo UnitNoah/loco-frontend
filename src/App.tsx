@@ -13,7 +13,6 @@ import JoinedSpots from './pages/my-pages/JoinedSpots'
 import Reports from './pages/my-pages/Reports'
 import Settings from './pages/my-pages/Settings'
 import Support from './pages/my-pages/Support'
-import CreateRoom from './pages/CreateRoom'
 
 function App() {
   const { login, logout, setInitialized } = useAuthStore()
@@ -86,7 +85,6 @@ function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
           <Route path="support" element={<Support />} />
-          <Route path="room/create" element={<CreateRoom />} />
           <Route path="*" element={<div>404 - Not Found</div>} />
         </Route>
       </Routes>

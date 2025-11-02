@@ -384,9 +384,7 @@ const isMember = isHost || isJoined
           )}
         </div>
       </div>
-          {isPlaceModalOpen && (
-      <PlaceCreateModal onClose={() => setIsPlaceModalOpen(false)} />
-    )}
+                 {isPlaceModalOpen && ( <PlaceCreateModal roomId={roomIdNumber} onClose={() => setIsPlaceModalOpen(false)}  /> )}
     </div>
   )
 }

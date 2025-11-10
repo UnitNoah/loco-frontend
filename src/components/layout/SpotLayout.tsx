@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useParams, useNavigate  } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import KakaoMap from '../maps/KakaoMap'
 import { usePublicRoom, usePrivateRoom, useJoinRoom, useLeaveRoom, useJoinedRooms } from '../../hooks/queries/useSpots'
 import { useAuthStore } from '../../store/authStore'
@@ -13,24 +13,66 @@ const SpotLayout = () => {
   const { id } = useParams<{ id: string }>()
   const roomIdNumber = id ? parseInt(id, 10) : 0
 
+  const [searchParams] = useSearchParams()
+  const paramType = searchParams.get('type')
+  const parsedParamType = paramType === 'private' ? 'private' : paramType === 'public' ? 'public' : null
+
+  const [roomType, setRoomType] = useState<'public' | 'private'>(parsedParamType ?? 'public')
+  const [allowFallback, setAllowFallback] = useState(parsedParamType === null)
+
+  useEffect(() => {
+    if (parsedParamType === 'private') {
+      setRoomType('private')
+      setAllowFallback(false)
+    } else if (parsedParamType === 'public') {
+      setRoomType('public')
+      setAllowFallback(false)
+    } else {
+      setAllowFallback(true)
+    }
+  }, [parsedParamType])
+
+  useEffect(() => {
+    if (parsedParamType === null) {
+      setRoomType('public')
+      setAllowFallback(true)
+    }
+  }, [roomIdNumber, parsedParamType])
+
   // Get user from auth store
   const { user } = useAuthStore()
 
   // Fetch room details - try both public and private
-  const { data: publicRoom, isLoading: publicLoading, error: publicError } = usePublicRoom(roomIdNumber, { 
+  const {
+    data: publicRoom,
+    isLoading: publicLoading,
+    error: publicError,
+  } = usePublicRoom(roomIdNumber, {
     retry: false,
-    staleTime: Infinity 
+    staleTime: Infinity,
+    enabled: roomIdNumber > 0 && roomType === 'public',
   })
-  const { data: privateRoom, isLoading: privateLoading, error: privateError } = usePrivateRoom(roomIdNumber, {
+  const {
+    data: privateRoom,
+    isLoading: privateLoading,
+    error: privateError,
+  } = usePrivateRoom(roomIdNumber, {
     retry: false,
-    staleTime: Infinity
+    staleTime: Infinity,
+    enabled: roomIdNumber > 0 && roomType === 'private',
   })
+
+  useEffect(() => {
+    if (allowFallback && roomType === 'public' && publicError) {
+      setRoomType('private')
+      setAllowFallback(false)
+    }
+  }, [allowFallback, roomType, publicError])
   
   // Determine which room data to use
-  const room = publicRoom || privateRoom
-  const roomLoading = publicLoading || privateLoading
-  // Only show error if both queries fail
-  const roomError = publicError && privateError && !publicRoom && !privateRoom ? privateError : null
+  const room = roomType === 'public' ? publicRoom : privateRoom
+  const roomLoading = roomType === 'public' ? publicLoading : privateLoading
+  const roomError = roomType === 'public' ? publicError : privateError
 
   // Fetch user's joined rooms to check membership
   const { data: joinedRooms = [] } = useJoinedRooms(user?.id || 0)

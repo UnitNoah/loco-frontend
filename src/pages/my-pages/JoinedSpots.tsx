@@ -27,6 +27,7 @@ const JoinedSpots = () => {
     isLiked: false, // No like data in Room API
     numOfLikes: 0,
     createdAt: new Date(), // No created date in Room API
+    isPrivate: room.is_private,
   }))
 
   const totalPages = Math.ceil(spotCards.length / itemsPerPage)
@@ -102,7 +103,8 @@ const JoinedSpots = () => {
                 numOfLikes={card.numOfLikes}
                 createdAt={card.createdAt}
                 mode="member"
-                onCardClick={() => navigate(`/spot/${card.id}`)}
+                roomType={card.isPrivate ? 'private' : 'public'}
+                onCardClick={() => navigate(`/spot/${card.id}?type=${card.isPrivate ? 'private' : 'public'}`)}
                 onLeaveClick={() => handleLeaveRoom(card.id)}
                 onLikeClick={() => console.log(`Liked ${card.title}`)}
               />

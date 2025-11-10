@@ -11,6 +11,7 @@ const Layout = () => {
   const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState(false)
   const user = useAuthStore(state => state.user)
   const isLoggedIn = useAuthStore(state => state.isLoggedIn)
+  const isInitialized = useAuthStore(state => state.isInitialized)
   const hostId = user?.id || 0
 
   const { mutate: createRoom, isPending } = useCreateRoom(hostId)
@@ -38,6 +39,14 @@ const Layout = () => {
           alert(`룸 생성에 실패했습니다: ${error.response?.data?.message || error.message}`)
         },
       }
+    )
+  }
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-500">Loading...</div>
+      </div>
     )
   }
 

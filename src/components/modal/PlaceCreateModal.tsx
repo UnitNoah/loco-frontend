@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { MagnifyingGlassIcon, XMarkIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 type PlaceCreateModalProps = {
+  roomId: number;
   onClose: () => void;
 };
 

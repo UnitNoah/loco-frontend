@@ -26,6 +26,8 @@ interface SpotListCardProps {
 
   // default mode 전용
   onLikeClick?: () => void
+
+  roomType?: 'public' | 'private'
 }
 
 const SpotListCard: React.FC<SpotListCardProps> = ({ 
@@ -46,13 +48,14 @@ const SpotListCard: React.FC<SpotListCardProps> = ({
   mode = "default",
   onEditClick,
   onDeleteClick,
-  onLeaveClick
+  onLeaveClick,
+  roomType = 'public'
 }) => {
   const [liked, setLiked] = useState(isLiked)
   const navigate = useNavigate()
 
   const handleCardClick = () => {
-    navigate(`/spot/${id}`)
+    navigate(`/spot/${id}?type=${roomType}`)
   }
 
   const handleLikeClick = (e: React.MouseEvent) => {

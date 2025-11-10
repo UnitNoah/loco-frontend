@@ -5,23 +5,23 @@ import { usePublicRooms, usePrivateRooms } from '../../hooks/queries/useSpots'
 import { useAuthStore } from '../../store/authStore'
 
 const SpotListLayout = () => {
-  const [activeTab, setActiveTab] = useState('공개')
+  const [activeTab, setActiveTab] = useState('public')
   const [searchQuery, setSearchQuery] = useState('')
   const { isLoggedIn } = useAuthStore()
 
-  const tabs = ['공개', '비공개']
+  const tabs = ['public', 'private']
 
   // Fetch data based on active tab
   const { data: publicRooms, isLoading: isLoadingPublic, error: publicError } = usePublicRooms()
   const { data: privateRooms, isLoading: isLoadingPrivate, error: privateError } = usePrivateRooms()
 
   // Get current data based on active tab
-  const currentRooms = activeTab === '공개' ? publicRooms : privateRooms
-  const isLoading = activeTab === '공개' ? isLoadingPublic : isLoadingPrivate
-  const error = activeTab === '공개' ? publicError : privateError
+  const currentRooms = activeTab === 'public' ? publicRooms : privateRooms
+  const isLoading = activeTab === 'public' ? isLoadingPublic : isLoadingPrivate
+  const error = activeTab === 'public' ? publicError : privateError
 
   // Show login message for private rooms when not logged in
-  const shouldShowLoginMessage = activeTab === '비공개' && !isLoggedIn
+  const shouldShowLoginMessage = activeTab === 'private' && !isLoggedIn
 
   // Transform rooms data and apply search filter
   const filteredRooms = useMemo(() => {
@@ -65,7 +65,7 @@ const SpotListLayout = () => {
                   : 'text-gray-600 hover:text-gray-800 border-[#D9D9D9]'
               }`}
             >
-              {tab}
+              {tab === 'public' ? '공개' : '비공개'}
             </button>
           ))}
         </div>
@@ -146,6 +146,7 @@ const SpotListLayout = () => {
               isLiked={card.isLiked}
               numOfLikes={card.numOfLikes}
               createdAt={card.createdAt}
+              roomType={activeTab === 'private' ? 'private' : 'public'}
               onCardClick={() => console.log(`Clicked on ${card.title}`)}
               onLikeClick={() => console.log(`Liked ${card.title}`)}
             />

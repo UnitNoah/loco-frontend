@@ -31,6 +31,7 @@ const MySpots = () => {
     isLiked: false, // No like data in Room API
     numOfLikes: 0,
     createdAt: new Date(), // No created date in Room API
+    isPrivate: room.is_private,
   }))
 
   const totalPages = Math.ceil(spotCards.length / itemsPerPage)
@@ -141,6 +142,7 @@ const MySpots = () => {
                 numOfLikes={card.numOfLikes}
                 createdAt={card.createdAt}
                 mode="owner"
+                roomType={card.isPrivate ? 'private' : 'public'}
                 onCardClick={() => console.log(`Clicked on ${card.title}`)}
                 onEditClick={() => handleEditClick(card.id)}
                 onDeleteClick={() => handleDeleteClick(card.id)}

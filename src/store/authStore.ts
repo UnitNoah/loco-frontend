@@ -28,6 +28,7 @@ type AuthState = {
   initFromCookie: () => void
   setUser: (user: Partial<UserInfo>) => void
   setInitialized: (value: boolean) => void  // 타입 정의에도 추가
+  clearAuthState: () => void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -56,6 +57,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   // 초기화 상태 업데이트
   setInitialized: (value) => set({ isInitialized: value }),
 
+  // 인증 정보만 초기화
+  clearAuthState: () => set({ isLoggedIn: false, user: null }),
+
   // 쿠키 기반 초기화
   initFromCookie: () => {
     const token = getCookie("access_token")
@@ -69,10 +73,7 @@ export const useAuthStore = create<AuthState>((set) => ({
           nickname: payload.nickname,
           profileImage: payload.profileImage,
         },
-        isInitialized: true,
       })
-    } else {
-      set({ isInitialized: true }) // 토큰 없을 때도 초기화 완료
     }
   },
 
